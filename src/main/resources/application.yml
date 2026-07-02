@@ -28,8 +28,12 @@ spring:
     consumer:
       group-id: spaceflow
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
       acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
   security:
     oauth2:
@@ -61,6 +65,10 @@ management:
 springdoc:
   swagger-ui:
     path: /swagger-ui
+
+spaceflow:
+  outbox:
+    poll-interval-ms: 2000
 
 logging:
   level:

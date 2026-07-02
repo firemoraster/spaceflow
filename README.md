@@ -60,9 +60,10 @@ docker compose up -d          # postgres, redis, kafka, prometheus, grafana (pla
 ## Roadmap
 
 - [x] Project skeleton, hexagonal booking slice, schema (Flyway)
-- [ ] Transactional Outbox + Kafka publisher
+- [x] Transactional Outbox + Kafka publisher (scheduled relay, at-least-once)
+- [x] Notification module — Kafka consumer of booking events
 - [ ] CQRS read-model projection in Redis
-- [ ] Idempotent consumer + notification module
+- [ ] Idempotent consumer (dedupe by messageId)
 - [ ] docker-compose (full infra) + Dockerfile
 - [ ] GitHub Actions CI + Grafana dashboards
 
