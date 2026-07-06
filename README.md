@@ -41,15 +41,30 @@ com.spaceflow
 
 ## Quick start
 
+Everything (app + Postgres + Redis + Kafka + Prometheus + Grafana) via Docker:
+
 ```bash
-cp .env.example .env          # fill in secrets
-docker compose up -d          # postgres, redis, kafka, prometheus, grafana (planned)
-./mvnw spring-boot:run        # or run SpaceFlowApplication from the IDE
+cp .env.example .env          # optional: adjust secrets
+docker compose up -d --build  # app runs with the `dev` profile (permissive auth)
 ```
 
-- Swagger UI: http://localhost:8080/swagger-ui
-- Health: http://localhost:8080/actuator/health
-- Metrics: http://localhost:8080/actuator/prometheus
+Or run infra in Docker and the app from your IDE / Maven:
+
+```bash
+docker compose up -d postgres redis kafka
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+| What        | URL                                            |
+|-------------|------------------------------------------------|
+| Swagger UI  | http://localhost:8080/swagger-ui               |
+| Health      | http://localhost:8080/actuator/health          |
+| Metrics     | http://localhost:8080/actuator/prometheus      |
+| Prometheus  | http://localhost:9090                          |
+| Grafana     | http://localhost:3000 (admin/admin)            |
+
+> The `dev` profile disables auth so the app boots without an OIDC provider.
+> Production profiles use the JWT resource server + OAuth2 login.
 
 ## Testing
 
@@ -57,14 +72,17 @@ docker compose up -d          # postgres, redis, kafka, prometheus, grafana (pla
 ./mvnw verify                 # unit + Testcontainers integration tests
 ```
 
+> A Maven Wrapper (`./mvnw`) is committed, so no local Maven install is needed —
+> only a JDK 17.
+
 ## Roadmap
 
 - [x] Project skeleton, hexagonal booking slice, schema (Flyway)
 - [x] Transactional Outbox + Kafka publisher (scheduled relay, at-least-once)
 - [x] Notification module — Kafka consumer of booking events
 - [x] CQRS read-model projection in Redis (query side served from Redis)
+- [x] docker-compose (full infra) + multi-stage Dockerfile + dev profile
 - [ ] Idempotent consumer (dedupe by messageId)
-- [ ] docker-compose (full infra) + Dockerfile
 - [ ] GitHub Actions CI + Grafana dashboards
 
 ## License

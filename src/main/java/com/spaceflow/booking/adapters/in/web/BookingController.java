@@ -21,6 +21,9 @@ import java.util.UUID;
 @RequestMapping("/api/v1/bookings")
 public class BookingController {
 
+    /** Fallback identity used only when running without auth (dev profile). */
+    private static final UUID DEMO_USER = UUID.fromString("00000000-0000-0000-0000-000000000001");
+
     private final CreateBookingUseCase createBooking;
 
     public BookingController(CreateBookingUseCase createBooking) {
@@ -31,7 +34,7 @@ public class BookingController {
     public ResponseEntity<Void> create(@Valid @RequestBody CreateBookingRequest request,
                                        @AuthenticationPrincipal Jwt jwt,
                                        UriComponentsBuilder uriBuilder) {
-        UUID userId = UUID.fromString(jwt.getSubject());
+        UUID userId = jwt != null ? UUID.fromString(jwt.getSubject()) : DEMO_USER;
         UUID id = createBooking.create(new CreateBookingCommand(
                 request.resourceId(), userId, request.startAt(), request.endAt()));
         URI location = uriBuilder.path("/api/v1/bookings/{id}").buildAndExpand(id).toUri();
