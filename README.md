@@ -50,7 +50,11 @@ other sends notifications.
   are served entirely from a Redis read model that a Kafka consumer keeps up to date.
 - **Idempotency by construction** — the Redis projection stores views in per-resource
   and per-user SETs keyed by identical JSON, so replaying an event is a no-op. Every
-  message also carries a `messageId` header for consumer-side dedupe.
+  message also carries a `messageId` header, and consumers with real side effects
+  (notifications) claim it in a
+  [`ProcessedMessageLedger`](src/main/java/com/spaceflow/shared/messaging/ProcessedMessageLedger.java)
+  — an `INSERT ... ON CONFLICT DO NOTHING` in the same transaction — so a redelivered
+  event is skipped, while a failed attempt rolls back and is retried.
 - **No double-booking** — overlap is checked in SQL and the `Booking` aggregate carries
   a JPA `@version`, so two concurrent requests for the same slot can't both commit.
 - **Outbox never uses `ddl-auto`** — schema is owned by Flyway migrations.
@@ -149,7 +153,7 @@ Testcontainers, so they need a running Docker daemon.
 - [x] Notification consumer
 - [x] One-command Docker stack + Maven wrapper
 - [x] GitHub Actions CI (build + tests on every push)
-- [ ] Idempotent consumer with a processed-message ledger
+- [x] Idempotent consumer with a processed-message ledger
 - [ ] Grafana dashboard for JVM + booking metrics
 - [ ] `resource` module (capacity, locations) fleshed out
 
